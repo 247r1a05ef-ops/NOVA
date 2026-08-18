@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>NOVA Dashboard</title>
+
+    <link rel="stylesheet" href="../style.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <div class="navbar">
+
+        <div class="logo">
+            🚀 NOVA
+        </div>
+
+
+        <div class="nav-links">
+
+            <span onclick="searchNOVA()">
+                🔍 Search
+            </span>
+
+            <span onclick="goToPlanner()">
+                📅 Planner
+            </span>
+
+            <span onclick="goToAssistant()">
+                🎙 Voice
+            </span>
+
+            <span onclick="showNotifications()">
+                🔔
+            </span>
+
+            <span onclick="goToProfile()">
+                👤
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         WELCOME
+         ===================================================== -->
+
+    <div class="greeting">
+
+        <h2 id="welcomeText">
+            👋 Welcome to NOVA
+        </h2>
+
+        <p>
+            🚀 Your AI-powered study companion
+        </p>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ASK NOVA AI CHAT
+         ===================================================== -->
+
+    <div class="nova-chat-section">
+
+        <div class="nova-chat-header">
+
+            <div>
+
+                <h2>
+                    🤖 Ask NOVA
+                </h2>
+
+                <p>
+                    Ask anything about programming, DSA,
+                    Python or your studies.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHAT MESSAGES -->
+
+        <div
+            class="chat-messages"
+            id="chatMessages"
+        >
+
+            <div class="nova-message">
+
+                <strong>🚀 NOVA</strong>
+
+                <p>
+                    Hey! 👋 I'm NOVA, your AI learning
+                    companion. What would you like to learn today?
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHAT INPUT -->
+
+        <div class="chat-input">
+
+            <input
+                type="text"
+                id="questionInput"
+                placeholder="Ask NOVA anything..."
+                autocomplete="off"
+            >
+
+            <button
+                id="askButton"
+                onclick="askNOVA()"
+            >
+                🚀 Ask
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+         ===================================================== -->
+
+    <div class="bottom-section">
+
+
+        <!-- PROGRESS -->
+
+        <div
+            class="card progress-card"
+            onclick="goToPlanner()"
+        >
+
+            <h2>
+                📈 Progress
+            </h2>
+
+            <br>
+
+            <div class="progress">
+
+                <div
+                    class="progress-fill"
+                    id="dashboardProgressFill"
+                ></div>
+
+            </div>
+
+            <br>
+
+            <h3 id="dashboardProgressText">
+                0%
+            </h3>
+
+            <br>
+
+            <p id="dashboardTaskText">
+                No tasks yet
+            </p>
+
+        </div>
+
+
+
+        <!-- AI SUGGESTION -->
+
+        <div
+            class="card ai-card"
+            onclick="showAISuggestion()"
+        >
+
+            <h2>
+                🤖 AI Suggestion
+            </h2>
+
+            <br>
+
+            <p id="aiSuggestionText">
+                Get personalized study suggestions
+            </p>
+
+        </div>
+
+
+
+        <!-- AI INSIGHTS -->
+
+        <div
+            class="card ai-card"
+            onclick="showAIInsights()"
+        >
+
+            <h2>
+                🧠 AI Insights
+            </h2>
+
+            <br>
+
+            <p id="aiInsightsText">
+                View your learning insights
+            </p>
+
+        </div>
+
+
+
+        <!-- TASKS -->
+
+        <div
+            class="card"
+            onclick="goToPlanner()"
+        >
+
+            <h2>
+                ✅ Tasks
+            </h2>
+
+            <br>
+
+            <p id="dashboardTasksCount">
+                No tasks yet
+            </p>
+
+        </div>
+
+
+
+        <!-- DEADLINES -->
+
+        <div
+            class="card"
+            onclick="showDeadlines()"
+        >
+
+            <h2>
+                ⏰ Deadlines
+            </h2>
+
+            <br>
+
+            <p id="deadlineText">
+                Check your upcoming deadlines
+            </p>
+
+        </div>
+
+
+
+        <!-- STATISTICS -->
+
+        <div
+            class="card"
+            onclick="showStatistics()"
+        >
+
+            <h2>
+                📊 Statistics
+            </h2>
+
+            <br>
+
+            <p id="statisticsText">
+                View your study statistics
+            </p>
+
+        </div>
+
+
+
+        <!-- LOGOUT -->
+
+        <div
+            class="card"
+            onclick="logout()"
+        >
+
+            <h2>
+                🚪 Logout
+            </h2>
+
+            <br>
+
+            <p>
+                Return to NOVA Login
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+
+
+        // =====================================================
+        // CHAT HISTORY
+        // =====================================================
+
+        let chatHistory = [];
+
+
+
+        // =====================================================
+        // PAGE LOAD
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                loadDarkMode();
+
+                loadTheme();
+
+                loadUser();
+
+                loadPlannerProgress();
+
+                loadDashboardStats();
+
+
+                // Enter key for Ask NOVA
+
+                const input =
+                    document.getElementById(
+                        "questionInput"
+                    );
+
+
+                if (input) {
+
+                    input.addEventListener(
+                        "keydown",
+                        function (event) {
+
+                            if (
+                                event.key === "Enter"
+                            ) {
+
+                                askNOVA();
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+
+        // =====================================================
+        // ASK NOVA
+        // =====================================================
+
+        async function askNOVA() {
+
+            const input =
+                document.getElementById(
+                    "questionInput"
+                );
+
+
+            const button =
+                document.getElementById(
+                    "askButton"
+                );
+
+
+            const chat =
+                document.getElementById(
+                    "chatMessages"
+                );
+
+
+            const question =
+                input.value.trim();
+
+
+            // Don't send empty question
+
+            if (!question) {
+
+                return;
+
+            }
+
+
+            // Add user message
+
+            addUserMessage(question);
+
+
+            // Clear input
+
+            input.value = "";
+
+
+            // Disable button
+
+            button.disabled = true;
+
+            button.innerText =
+                "🤔 Thinking...";
+
+
+            // Add typing message
+
+            const typingMessage =
+                document.createElement(
+                    "div"
+                );
+
+
+            typingMessage.className =
+                "nova-message";
+
+            typingMessage.id =
+                "typingMessage";
+
+
+            typingMessage.innerHTML = `
+
+                <strong>🚀 NOVA</strong>
+
+                <p>
+
+                    <span class="typing">
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                    </span>
+
+                </p>
+
+            `;
+
+
+            chat.appendChild(
+                typingMessage
+            );
+
+
+            scrollChat();
+
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        question,
+
+                                    history:
+                                        chatHistory
+
+                                })
+
+                        }
+                    );
+
+
+
+                const data =
+                    await response.json();
+
+
+
+                // Remove typing message
+
+                const typing =
+                    document.getElementById(
+                        "typingMessage"
+                    );
+
+
+                if (typing) {
+
+                    typing.remove();
+
+                }
+
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI request failed"
+                    );
+
+                }
+
+
+
+                const answer =
+                    data.answer ||
+                    "Sorry, NOVA could not generate an answer.";
+
+
+                // Add NOVA response
+
+                addNovaMessage(answer);
+
+
+                // Save conversation
+
+                chatHistory.push({
+
+                    role: "user",
+
+                    content: question
+
+                });
+
+
+                chatHistory.push({
+
+                    role: "assistant",
+
+                    content: answer
+
+                });
+
+
+
+                // Update question count
+
+                updateQuestionCount();
+
+
+
+                // Save topic
+
+                saveTopic(question);
+
+            }
+
+
+
+            catch (error) {
+
+                console.error(
+                    "NOVA Error:",
+                    error
+                );
+
+
+                const typing =
+                    document.getElementById(
+                        "typingMessage"
+                    );
+
+
+                if (typing) {
+
+                    typing.remove();
+
+                }
+
+
+                addNovaMessage(
+                    "❌ Sorry, I couldn't connect to NOVA's AI server. Make sure your backend is running on port 3000."
+                );
+
+            }
+
+
+
+            finally {
+
+                button.disabled =
+                    false;
+
+                button.innerText =
+                    "🚀 Ask";
+
+                input.focus();
+
+                scrollChat();
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // ADD USER MESSAGE
+        // =====================================================
+
+        function addUserMessage(
+            message
+        ) {
+
+            const chat =
+                document.getElementById(
+                    "chatMessages"
+                );
+
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "user-message";
+
+
+            div.innerHTML = `
+
+                <strong>👤 You</strong>
+
+                <p></p>
+
+            `;
+
+
+            div.querySelector(
+                "p"
+            ).textContent =
+                message;
+
+
+            chat.appendChild(div);
+
+
+            scrollChat();
+
+        }
+
+
+
+        // =====================================================
+        // ADD NOVA MESSAGE
+        // =====================================================
+
+        function addNovaMessage(
+            message
+        ) {
+
+            const chat =
+                document.getElementById(
+                    "chatMessages"
+                );
+
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "nova-message";
+
+
+            div.innerHTML = `
+
+                <strong>🚀 NOVA</strong>
+
+                <p></p>
+
+            `;
+
+
+            div.querySelector(
+                "p"
+            ).textContent =
+                message;
+
+
+            chat.appendChild(div);
+
+
+            scrollChat();
+
+        }
+
+
+
+        // =====================================================
+        // SCROLL CHAT
+        // =====================================================
+
+        function scrollChat() {
+
+            const chat =
+                document.getElementById(
+                    "chatMessages"
+                );
+
+
+            chat.scrollTop =
+                chat.scrollHeight;
+
+        }
+
+
+
+        // =====================================================
+        // QUESTION COUNT
+        // =====================================================
+
+        function updateQuestionCount() {
+
+            let count =
+                Number(
+                    localStorage.getItem(
+                        "novaQuestionCount"
+                    )
+                ) || 0;
+
+
+            count++;
+
+
+            localStorage.setItem(
+                "novaQuestionCount",
+                count
+            );
+
+        }
+
+
+
+        // =====================================================
+        // SAVE TOPIC
+        // =====================================================
+
+        function saveTopic(
+            question
+        ) {
+
+            let topics = [];
+
+
+            try {
+
+                topics =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "novaTopics"
+                        )
+                    ) || [];
+
+            }
+
+            catch (error) {
+
+                topics = [];
+
+            }
+
+
+            // Store the question as a topic
+
+            topics.push(
+                question
+            );
+
+
+            // Keep only latest 50
+
+            if (
+                topics.length > 50
+            ) {
+
+                topics =
+                    topics.slice(-50);
+
+            }
+
+
+            localStorage.setItem(
+                "novaTopics",
+                JSON.stringify(topics)
+            );
+
+        }
+
+
+
+        // =====================================================
+        // LOAD USER
+        // =====================================================
+
+        function loadUser() {
+
+            const email =
+                localStorage.getItem(
+                    "novaUserEmail"
+                );
+
+
+            const welcome =
+                document.getElementById(
+                    "welcomeText"
+                );
+
+
+            if (
+                email &&
+                welcome
+            ) {
+
+                welcome.innerText =
+                    "👋 Welcome to NOVA, " +
+                    email;
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // DARK MODE
+        // =====================================================
+
+        function loadDarkMode() {
+
+            const darkMode =
+                localStorage.getItem(
+                    "darkMode"
+                );
+
+
+            if (
+                darkMode === "on"
+            ) {
+
+                document.body.classList.add(
+                    "dark-mode"
+                );
+
+            }
+
+            else {
+
+                document.body.classList.remove(
+                    "dark-mode"
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // THEME
+        // =====================================================
+
+        function loadTheme() {
+
+            const theme =
+                localStorage.getItem(
+                    "novaTheme"
+                );
+
+
+            document.body.classList.remove(
+                "theme-sky",
+                "theme-green",
+                "theme-purple"
+            );
+
+
+            if (
+                theme === "green"
+            ) {
+
+                document.body.classList.add(
+                    "theme-green"
+                );
+
+            }
+
+            else if (
+                theme === "purple"
+            ) {
+
+                document.body.classList.add(
+                    "theme-purple"
+                );
+
+            }
+
+            else {
+
+                document.body.classList.add(
+                    "theme-sky"
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // LOAD PLANNER PROGRESS
+        // =====================================================
+
+        function loadPlannerProgress() {
+
+            const savedTasks =
+                localStorage.getItem(
+                    "tasks"
+                );
+
+
+            const progressFill =
+                document.getElementById(
+                    "dashboardProgressFill"
+                );
+
+
+            const progressText =
+                document.getElementById(
+                    "dashboardProgressText"
+                );
+
+
+            const taskText =
+                document.getElementById(
+                    "dashboardTaskText"
+                );
+
+
+            const tasksCount =
+                document.getElementById(
+                    "dashboardTasksCount"
+                );
+
+
+            if (!savedTasks) {
+
+                progressFill.style.width =
+                    "0%";
+
+                progressText.innerText =
+                    "0%";
+
+                taskText.innerText =
+                    "No tasks yet";
+
+                tasksCount.innerText =
+                    "No tasks yet";
+
+                return;
+
+            }
+
+
+
+            const tempList =
+                document.createElement(
+                    "ul"
+                );
+
+
+            tempList.innerHTML =
+                savedTasks;
+
+
+            const tasks =
+                tempList.querySelectorAll(
+                    "li"
+                );
+
+
+            const completedTasks =
+                tempList.querySelectorAll(
+                    ".completed"
+                );
+
+
+            const total =
+                tasks.length;
+
+
+            const completed =
+                completedTasks.length;
+
+
+            let percentage = 0;
+
+
+            if (
+                total > 0
+            ) {
+
+                percentage =
+                    Math.round(
+                        (completed / total) * 100
+                    );
+
+            }
+
+
+            progressFill.style.width =
+                percentage + "%";
+
+
+            progressText.innerText =
+                percentage + "%";
+
+
+            taskText.innerText =
+                completed +
+                " / " +
+                total +
+                " tasks completed";
+
+
+            tasksCount.innerText =
+                total +
+                " task" +
+                (total === 1 ? "" : "s");
+
+        }
+
+
+
+        // =====================================================
+        // DASHBOARD STATISTICS
+        // =====================================================
+
+        function loadDashboardStats() {
+
+            const questionCount =
+                Number(
+                    localStorage.getItem(
+                        "novaQuestionCount"
+                    )
+                ) || 0;
+
+
+            let topics = [];
+
+
+            try {
+
+                topics =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "novaTopics"
+                        )
+                    ) || [];
+
+            }
+
+            catch (error) {
+
+                topics = [];
+
+            }
+
+
+            const statistics =
+                document.getElementById(
+                    "statisticsText"
+                );
+
+
+            statistics.innerText =
+                questionCount +
+                " questions asked • " +
+                topics.length +
+                " topics studied";
+
+        }
+
+
+
+        // =====================================================
+        // PLANNER
+        // =====================================================
+
+        function goToPlanner() {
+
+            window.location.href =
+                "planner.html";
+
+        }
+
+
+
+        // =====================================================
+        // VOICE ASSISTANT
+        // =====================================================
+
+        function goToAssistant() {
+
+            window.location.href =
+                "voice-assistant.html";
+
+        }
+
+
+
+        // =====================================================
+        // PROFILE
+        // =====================================================
+
+        function goToProfile() {
+
+            const email =
+                localStorage.getItem(
+                    "novaUserEmail"
+                );
+
+
+            alert(
+                "👤 NOVA Profile\n\n" +
+                "Email: " +
+                (email || "Not available")
+            );
+
+        }
+
+
+
+        // =====================================================
+        // SEARCH
+        // =====================================================
+
+        function searchNOVA() {
+
+            const query =
+                prompt(
+                    "🔍 What do you want to search?"
+                );
+
+
+            if (
+                query !== null &&
+                query.trim() !== ""
+            ) {
+
+                localStorage.setItem(
+                    "novaLastSearch",
+                    query.trim()
+                );
+
+
+                alert(
+                    "🔍 NOVA received your search:\n\n" +
+                    query.trim()
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // NOTIFICATIONS
+        // =====================================================
+
+        function showNotifications() {
+
+            const savedTasks =
+                localStorage.getItem(
+                    "tasks"
+                );
+
+
+            if (!savedTasks) {
+
+                alert(
+                    "🔔 No tasks available."
+                );
+
+                return;
+
+            }
+
+
+            const tempList =
+                document.createElement(
+                    "ul"
+                );
+
+
+            tempList.innerHTML =
+                savedTasks;
+
+
+            const tasks =
+                tempList.querySelectorAll(
+                    "li"
+                );
+
+
+            const incomplete =
+                Array.from(tasks).filter(
+                    function (task) {
+
+                        return !task.classList.contains(
+                            "completed"
+                        );
+
+                    }
+                );
+
+
+            if (
+                tasks.length === 0
+            ) {
+
+                alert(
+                    "🔔 No tasks available."
+                );
+
+            }
+
+            else if (
+                incomplete.length === 0
+            ) {
+
+                alert(
+                    "🎉 Great job!\n\n" +
+                    "You have completed all your tasks."
+                );
+
+            }
+
+            else {
+
+                alert(
+                    "🔔 Reminder:\n\n" +
+                    "You have " +
+                    incomplete.length +
+                    " incomplete task(s)."
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // AI SUGGESTION
+        // =====================================================
+
+        async function showAISuggestion() {
+
+            const suggestion =
+                document.getElementById(
+                    "aiSuggestionText"
+                );
+
+
+            suggestion.innerText =
+                "🤔 NOVA is thinking...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        "Give me one short personalized study suggestion for a CSE student learning Python, DSA and programming. Keep it practical and encouraging.",
+
+                                    history: []
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI request failed"
+                    );
+
+                }
+
+
+                suggestion.innerText =
+                    data.answer;
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "AI Suggestion Error:",
+                    error
+                );
+
+
+                suggestion.innerText =
+                    "❌ Could not get an AI suggestion.";
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // AI INSIGHTS
+        // =====================================================
+
+        async function showAIInsights() {
+
+            const insights =
+                document.getElementById(
+                    "aiInsightsText"
+                );
+
+
+            insights.innerText =
+                "🤔 NOVA is analyzing your progress...";
+
+
+            const savedTasks =
+                localStorage.getItem(
+                    "tasks"
+                );
+
+
+            let taskInformation =
+                "No tasks available.";
+
+
+            if (savedTasks) {
+
+                const tempList =
+                    document.createElement(
+                        "ul"
+                    );
+
+
+                tempList.innerHTML =
+                    savedTasks;
+
+
+                const tasks =
+                    tempList.querySelectorAll(
+                        "li"
+                    );
+
+
+                const completed =
+                    tempList.querySelectorAll(
+                        ".completed"
+                    ).length;
+
+
+                taskInformation =
+                    "Total tasks: " +
+                    tasks.length +
+                    ". Completed tasks: " +
+                    completed +
+                    ".";
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        "Analyze this student's study progress and give 2 short useful insights.\n\n" +
+                                        taskInformation +
+                                        "\n\nKeep the response beginner-friendly.",
+
+                                    history: []
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI request failed"
+                    );
+
+                }
+
+
+                insights.innerText =
+                    data.answer;
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "AI Insights Error:",
+                    error
+                );
+
+
+                insights.innerText =
+                    "❌ Could not generate insights.";
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // DEADLINES
+        // =====================================================
+
+        function showDeadlines() {
+
+            const savedTasks =
+                localStorage.getItem(
+                    "tasks"
+                );
+
+
+            if (!savedTasks) {
+
+                alert(
+                    "⏰ No upcoming deadlines."
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                "⏰ Your planner contains tasks.\n\n" +
+                "Open Planner to manage your deadlines."
+            );
+
+        }
+
+
+
+        // =====================================================
+        // STATISTICS
+        // =====================================================
+
+        function showStatistics() {
+
+            const questions =
+                Number(
+                    localStorage.getItem(
+                        "novaQuestionCount"
+                    )
+                ) || 0;
+
+
+            let topics = [];
+
+
+            try {
+
+                topics =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "novaTopics"
+                        )
+                    ) || [];
+
+            }
+
+            catch (error) {
+
+                topics = [];
+
+            }
+
+
+            const savedTasks =
+                localStorage.getItem(
+                    "tasks"
+                );
+
+
+            let totalTasks = 0;
+
+            let completedTasks = 0;
+
+
+            if (savedTasks) {
+
+                const tempList =
+                    document.createElement(
+                        "ul"
+                    );
+
+
+                tempList.innerHTML =
+                    savedTasks;
+
+
+                totalTasks =
+                    tempList.querySelectorAll(
+                        "li"
+                    ).length;
+
+
+                completedTasks =
+                    tempList.querySelectorAll(
+                        ".completed"
+                    ).length;
+
+            }
+
+
+            let percentage = 0;
+
+
+            if (
+                totalTasks > 0
+            ) {
+
+                percentage =
+                    Math.round(
+                        (completedTasks /
+                            totalTasks) *
+                        100
+                    );
+
+            }
+
+
+            alert(
+
+                "📊 NOVA Statistics\n\n" +
+
+                "❓ Questions Asked: " +
+                questions +
+
+                "\n📚 Topics Studied: " +
+                topics.length +
+
+                "\n✅ Tasks Completed: " +
+                completedTasks +
+                " / " +
+                totalTasks +
+
+                "\n📈 Task Progress: " +
+                percentage +
+                "%"
+
+            );
+
+        }
+
+
+
+        // =====================================================
+        // LOGOUT
+        // =====================================================
+
+        function logout() {
+
+            const confirmLogout =
+                confirm(
+                    "🚪 Are you sure you want to logout?"
+                );
+
+
+            if (
+                confirmLogout
+            ) {
+
+                localStorage.removeItem(
+                    "novaUserEmail"
+                );
+
+
+                window.location.href =
+                    "login.html";
+
+            }
+
+        }
+
+
+    </script>
+
+
+</body>
+
+</html>

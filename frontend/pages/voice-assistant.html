@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>NOVA AI Voice Assistant</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #667eea,
+                    #764ba2
+                );
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            padding: 30px;
+
+            transition:
+                background 0.3s,
+                color 0.3s;
+
+        }
+
+
+        /* ==========================================
+           MAIN ASSISTANT
+           ========================================== */
+
+        .assistant-container {
+
+            width: 100%;
+
+            max-width: 900px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.95
+                );
+
+            border-radius: 25px;
+
+            padding: 35px;
+
+            box-shadow:
+                0 20px 50px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.2
+                );
+
+        }
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-top: 0;
+
+            font-size: 38px;
+
+        }
+
+
+        .subtitle {
+
+            text-align: center;
+
+            color: #666;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        /* ==========================================
+           VOICE AREA
+           ========================================== */
+
+        .voice-area {
+
+            text-align: center;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        #micButton {
+
+            width: 90px;
+
+            height: 90px;
+
+            border-radius: 50%;
+
+            border: none;
+
+            font-size: 35px;
+
+            cursor: pointer;
+
+            background: #667eea;
+
+            color: white;
+
+            box-shadow:
+                0 8px 20px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.2
+                );
+
+            transition: 0.2s;
+
+        }
+
+
+        #micButton:hover {
+
+            transform: scale(1.08);
+
+        }
+
+
+        #micButton.listening {
+
+            background: #e74c3c;
+
+            animation:
+                pulse 1s infinite;
+
+        }
+
+
+        @keyframes pulse {
+
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.12);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+
+        }
+
+
+        #voiceStatus {
+
+            margin-top: 15px;
+
+            font-weight: bold;
+
+        }
+
+
+        /* ==========================================
+           INPUT
+           ========================================== */
+
+        .input-area {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        #questionInput {
+
+            flex: 1;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            border:
+                1px solid #ccc;
+
+            font-size: 16px;
+
+        }
+
+
+        #sendButton {
+
+            padding:
+                0 25px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            background: #667eea;
+
+            color: white;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        #sendButton:hover {
+
+            opacity: 0.9;
+
+        }
+
+
+        /* ==========================================
+           ANSWER
+           ========================================== */
+
+        .answer-box {
+
+            min-height: 120px;
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            background: #f5f6fa;
+
+            margin-bottom: 20px;
+
+            line-height: 1.6;
+
+            white-space: pre-wrap;
+
+        }
+
+
+        /* ==========================================
+           BUTTONS
+           ========================================== */
+
+        .assistant-buttons {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .assistant-buttons button {
+
+            padding:
+                12px 18px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+        }
+
+
+        /* ==========================================
+           STUDY MODE
+           ========================================== */
+
+        .study-mode-container {
+
+            margin-top: 35px;
+
+            padding: 25px;
+
+            border-radius: 18px;
+
+            background:
+                rgba(
+                    245,
+                    246,
+                    250,
+                    0.95
+                );
+
+            border:
+                1px solid #ddd;
+
+        }
+
+
+        .study-mode-container h2 {
+
+            margin-top: 0;
+
+        }
+
+
+        #studyTopic,
+        #quizAnswer {
+
+            width: 100%;
+
+            padding: 14px;
+
+            margin:
+                15px 0;
+
+            border-radius: 10px;
+
+            border:
+                1px solid #ccc;
+
+            font-size: 16px;
+
+        }
+
+
+        .study-mode-container button {
+
+            padding:
+                12px 18px;
+
+            margin:
+                5px 3px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            background: #667eea;
+
+            color: white;
+
+        }
+
+
+        .study-mode-container button:hover {
+
+            opacity: 0.9;
+
+        }
+
+
+        .study-mode-container button:disabled {
+
+            opacity: 0.5;
+
+            cursor: not-allowed;
+
+        }
+
+
+        #quizQuestion {
+
+            font-size: 20px;
+
+            line-height: 1.5;
+
+            font-weight: bold;
+
+            margin:
+                20px 0;
+
+        }
+
+
+        #quizFeedback {
+
+            font-size: 17px;
+
+            line-height: 1.6;
+
+            white-space: pre-wrap;
+
+            margin-top: 20px;
+
+        }
+
+
+        #quizScore {
+
+            font-size: 18px;
+
+            font-weight: bold;
+
+        }
+
+
+        .quiz-status {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+        }
+
+
+        /* ==========================================
+           DARK MODE
+           ========================================== */
+
+        body.dark-mode {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #111827,
+                    #1f2937
+                );
+
+            color: white;
+
+        }
+
+
+        body.dark-mode
+        .assistant-container {
+
+            background:
+                rgba(
+                    31,
+                    41,
+                    55,
+                    0.97
+                );
+
+        }
+
+
+        body.dark-mode
+        .subtitle {
+
+            color: #ccc;
+
+        }
+
+
+        body.dark-mode
+        .answer-box {
+
+            background: #111827;
+
+        }
+
+
+        body.dark-mode
+        .study-mode-container {
+
+            background: #111827;
+
+            border-color: #374151;
+
+        }
+
+
+        body.dark-mode
+        #questionInput,
+
+        body.dark-mode
+        #studyTopic,
+
+        body.dark-mode
+        #quizAnswer {
+
+            background: #1f2937;
+
+            color: white;
+
+            border-color: #4b5563;
+
+        }
+
+
+        @media(max-width: 600px) {
+
+            .assistant-container {
+
+                padding: 20px;
+
+            }
+
+
+            h1 {
+
+                font-size: 30px;
+
+            }
+
+
+            .input-area {
+
+                flex-direction: column;
+
+            }
+
+
+            #sendButton {
+
+                padding: 14px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="assistant-container">
+
+
+        <!-- ======================================
+             HEADER
+             ====================================== -->
+
+        <h1>🤖 NOVA</h1>
+
+        <p class="subtitle">
+            Your AI Study Assistant
+        </p>
+
+
+        <!-- ======================================
+             VOICE ASSISTANT
+             ====================================== -->
+
+        <div class="voice-area">
+
+            <button
+                id="micButton"
+                onclick="toggleListening()"
+            >
+                🎙️
+            </button>
+
+            <div id="voiceStatus">
+                Click the microphone to speak
+            </div>
+
+        </div>
+
+
+        <!-- ======================================
+             TEXT INPUT
+             ====================================== -->
+
+        <div class="input-area">
+
+            <input
+                type="text"
+                id="questionInput"
+                placeholder="Ask NOVA anything..."
+            >
+
+            <button
+                id="sendButton"
+                onclick="askAI()"
+            >
+                Ask NOVA
+            </button>
+
+        </div>
+
+
+        <!-- ======================================
+             AI ANSWER
+             ====================================== -->
+
+        <div
+            class="answer-box"
+            id="answerBox"
+        >
+            👋 Hello! I'm NOVA.
+
+            Ask me a question to get started.
+        </div>
+
+
+        <!-- ======================================
+             ASSISTANT BUTTONS
+             ====================================== -->
+
+        <div class="assistant-buttons">
+
+            <button
+                onclick="speakAnswer()"
+            >
+                🔊 Speak Answer
+            </button>
+
+
+            <!-- NEW MUTE BUTTON -->
+
+            <button
+                id="muteButton"
+                onclick="toggleMute()"
+            >
+                🔊 Voice On
+            </button>
+
+
+            <button
+                onclick="clearConversation()"
+            >
+                🗑️ Clear Chat
+            </button>
+
+
+            <button
+                onclick="toggleDarkMode()"
+            >
+                🌙 Dark Mode
+            </button>
+
+        </div>
+
+
+        <!-- ======================================
+             STUDY MODE
+             ====================================== -->
+
+        <div
+            class="study-mode-container"
+        >
+
+            <h2>
+                🎓 NOVA Study Mode
+            </h2>
+
+            <p>
+                Choose a topic and let NOVA
+                quiz you.
+            </p>
+
+
+            <!-- ==================================
+                 START QUIZ
+                 ================================== -->
+
+            <div id="studyStart">
+
+                <input
+                    type="text"
+                    id="studyTopic"
+                    placeholder="Enter topic e.g. Python, DSA, Mathematics"
+                >
+
+
+                <button
+                    onclick="startStudyMode()"
+                >
+                    🎓 Start Quiz
+                </button>
+
+            </div>
+
+
+            <!-- ==================================
+                 QUIZ AREA
+                 ================================== -->
+
+            <div
+                id="quizArea"
+                style="display:none;"
+            >
+
+                <h3 id="quizTopic">
+                    📚 Topic
+                </h3>
+
+
+                <div class="quiz-status">
+
+                    <p id="quizScore">
+                        📊 Score: 0
+                    </p>
+
+                    <p>
+                        ❓ Question:
+                        <span id="quizNumber">
+                            1
+                        </span>
+                    </p>
+
+                </div>
+
+
+                <p id="quizQuestion">
+                    Loading question...
+                </p>
+
+
+                <input
+                    type="text"
+                    id="quizAnswer"
+                    placeholder="Type your answer..."
+                >
+
+
+                <div class="quiz-buttons">
+
+                    <button
+                        id="submitQuizButton"
+                        onclick="submitQuizAnswer()"
+                    >
+                        ✅ Submit Answer
+                    </button>
+
+
+                    <button
+                        id="nextQuizButton"
+                        onclick="nextQuizQuestion()"
+                    >
+                        ⏭️ Next Question
+                    </button>
+
+
+                    <button
+                        onclick="exitStudyMode()"
+                    >
+                        🛑 Exit Quiz
+                    </button>
+
+                </div>
+
+
+                <p id="quizFeedback"></p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+
+        // ==========================================
+        // CONVERSATION MEMORY
+        // ==========================================
+
+        let conversationHistory =
+            JSON.parse(
+                localStorage.getItem(
+                    "novaConversation"
+                )
+            ) || [];
+
+
+        // ==========================================
+        // VOICE VARIABLES
+        // ==========================================
+
+        let recognition = null;
+
+        let isListening = false;
+
+
+        // ==========================================
+        // MUTE / VOICE VARIABLES
+        // ==========================================
+
+        let isMuted =
+            localStorage.getItem(
+                "novaVoiceMuted"
+            ) === "true";
+
+
+        // ==========================================
+        // STUDY MODE VARIABLES
+        // ==========================================
+
+        let studyMode = false;
+
+        let studyTopic = "";
+
+        let quizScore = 0;
+
+        let quizQuestionNumber = 0;
+
+
+        // IMPORTANT:
+        // Stores current question,
+        // correct answer and explanation.
+
+        let currentQuiz = null;
+
+
+        // Prevent answering same question twice
+
+        let questionAlreadyAnswered = false;
+
+
+        // ==========================================
+        // ELEMENTS
+        // ==========================================
+
+        const micButton =
+            document.getElementById(
+                "micButton"
+            );
+
+
+        const voiceStatus =
+            document.getElementById(
+                "voiceStatus"
+            );
+
+
+        const questionInput =
+            document.getElementById(
+                "questionInput"
+            );
+
+
+        const answerBox =
+            document.getElementById(
+                "answerBox"
+            );
+
+
+        const muteButton =
+            document.getElementById(
+                "muteButton"
+            );
+
+
+        // ==========================================
+        // UPDATE MUTE BUTTON
+        // ==========================================
+
+        function updateMuteButton() {
+
+            if (!muteButton) {
+
+                return;
+
+            }
+
+
+            if (isMuted) {
+
+                muteButton.innerText =
+                    "🔇 Voice Muted";
+
+            }
+
+            else {
+
+                muteButton.innerText =
+                    "🔊 Voice On";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // TOGGLE MUTE
+        // ==========================================
+
+        function toggleMute() {
+
+            isMuted =
+                !isMuted;
+
+
+            localStorage.setItem(
+                "novaVoiceMuted",
+                isMuted
+            );
+
+
+            // If muting, immediately stop speech
+
+            if (isMuted) {
+
+                if (
+                    "speechSynthesis"
+                    in window
+                ) {
+
+                    speechSynthesis.cancel();
+
+                }
+
+
+                if (voiceStatus) {
+
+                    voiceStatus.innerText =
+                        "🔇 NOVA voice is muted";
+
+                }
+
+            }
+
+            else {
+
+                if (voiceStatus) {
+
+                    voiceStatus.innerText =
+                        "🔊 NOVA voice is enabled";
+
+                }
+
+            }
+
+
+            updateMuteButton();
+
+        }
+
+
+        // Update button when page loads
+
+        updateMuteButton();
+
+
+        // ==========================================
+        // VOICE RECOGNITION
+        // ==========================================
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+
+        if (SpeechRecognition) {
+
+            recognition =
+                new SpeechRecognition();
+
+
+            recognition.continuous =
+                false;
+
+            recognition.interimResults =
+                false;
+
+            recognition.lang =
+                "en-US";
+
+
+            recognition.onstart =
+                function () {
+
+                    isListening = true;
+
+
+                    micButton
+                        .classList
+                        .add("listening");
+
+
+                    voiceStatus.innerText =
+                        "🎙️ Listening...";
+
+                };
+
+
+            recognition.onresult =
+                function (event) {
+
+                    const transcript =
+                        event
+                            .results[0][0]
+                            .transcript;
+
+
+                    questionInput.value =
+                        transcript;
+
+
+                    voiceStatus.innerText =
+                        "✅ Question received";
+
+
+                    askAI();
+
+                };
+
+
+            recognition.onerror =
+                function (event) {
+
+                    console.error(
+                        "Speech error:",
+                        event.error
+                    );
+
+
+                    voiceStatus.innerText =
+                        "❌ Voice error";
+
+                };
+
+
+            recognition.onend =
+                function () {
+
+                    isListening = false;
+
+
+                    micButton
+                        .classList
+                        .remove("listening");
+
+                };
+
+        }
+
+        else {
+
+            voiceStatus.innerText =
+                "Voice recognition is not supported.";
+
+        }
+
+
+        // ==========================================
+        // START / STOP LISTENING
+        // ==========================================
+
+        function toggleListening() {
+
+            if (!recognition) {
+
+                alert(
+                    "Your browser does not support voice recognition."
+                );
+
+                return;
+
+            }
+
+
+            if (isListening) {
+
+                recognition.stop();
+
+            }
+
+            else {
+
+                recognition.start();
+
+            }
+
+        }
+
+
+        // ==========================================
+        // ASK NOVA
+        // ==========================================
+
+        async function askAI() {
+
+            const question =
+                questionInput.value.trim();
+
+
+            if (!question) {
+
+                return;
+
+            }
+
+
+            answerBox.innerText =
+                "🤔 NOVA is thinking...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        question,
+
+                                    history:
+                                        conversationHistory
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Something went wrong"
+                    );
+
+                }
+
+
+                const answer =
+                    data.answer;
+
+
+                answerBox.innerText =
+                    answer;
+
+
+                // ==================================
+                // SAVE CONVERSATION
+                // ==================================
+
+                conversationHistory.push({
+
+                    role: "user",
+
+                    content: question
+
+                });
+
+
+                conversationHistory.push({
+
+                    role: "assistant",
+
+                    content: answer
+
+                });
+
+
+                localStorage.setItem(
+
+                    "novaConversation",
+
+                    JSON.stringify(
+                        conversationHistory
+                    )
+
+                );
+
+
+                // ==================================
+                // SPEAK ANSWER
+                // ==================================
+
+                speakText(answer);
+
+
+                questionInput.value = "";
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "NOVA ERROR:",
+                    error
+                );
+
+
+                answerBox.innerText =
+                    "❌ NOVA could not answer your question.";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // TEXT TO SPEECH
+        // ==========================================
+
+        function speakText(text) {
+
+            // Don't speak when muted
+
+            if (isMuted) {
+
+                return;
+
+            }
+
+
+            if (
+                !("speechSynthesis" in window)
+            ) {
+
+                return;
+
+            }
+
+
+            speechSynthesis.cancel();
+
+
+            const speech =
+                new SpeechSynthesisUtterance(
+                    text
+                );
+
+
+            speech.lang =
+                "en-US";
+
+
+            speech.rate =
+                0.95;
+
+
+            speech.pitch =
+                1;
+
+
+            speechSynthesis.speak(
+                speech
+            );
+
+        }
+
+
+        // ==========================================
+        // SPEAK CURRENT ANSWER
+        // ==========================================
+
+        function speakAnswer() {
+
+            // Don't speak when muted
+
+            if (isMuted) {
+
+                return;
+
+            }
+
+
+            const answer =
+                answerBox.innerText;
+
+
+            if (!answer) {
+
+                return;
+
+            }
+
+
+            speakText(answer);
+
+        }
+
+
+        // ==========================================
+        // CLEAR CONVERSATION
+        // ==========================================
+
+        function clearConversation() {
+
+            conversationHistory = [];
+
+
+            localStorage.removeItem(
+                "novaConversation"
+            );
+
+
+            // Stop current speech too
+
+            if (
+                "speechSynthesis"
+                in window
+            ) {
+
+                speechSynthesis.cancel();
+
+            }
+
+
+            answerBox.innerText =
+                "🗑️ Conversation cleared.";
+
+        }
+
+
+        // ==========================================
+        // DARK MODE
+        // ==========================================
+
+        function toggleDarkMode() {
+
+            document.body
+                .classList
+                .toggle("dark-mode");
+
+        }
+
+
+        // ==========================================
+        // START STUDY MODE
+        // ==========================================
+
+        function startStudyMode() {
+
+            const topic =
+                document
+                    .getElementById(
+                        "studyTopic"
+                    )
+                    .value
+                    .trim();
+
+
+            if (!topic) {
+
+                alert(
+                    "Please enter a topic first."
+                );
+
+                return;
+
+            }
+
+
+            studyMode = true;
+
+            studyTopic = topic;
+
+            quizScore = 0;
+
+            quizQuestionNumber = 1;
+
+            currentQuiz = null;
+
+            questionAlreadyAnswered = false;
+
+
+            document
+                .getElementById(
+                    "studyStart"
+                )
+                .style.display =
+                "none";
+
+
+            document
+                .getElementById(
+                    "quizArea"
+                )
+                .style.display =
+                "block";
+
+
+            document
+                .getElementById(
+                    "quizTopic"
+                )
+                .innerText =
+                "📚 Topic: " +
+                studyTopic;
+
+
+            document
+                .getElementById(
+                    "quizScore"
+                )
+                .innerText =
+                "📊 Score: 0";
+
+
+            document
+                .getElementById(
+                    "quizNumber"
+                )
+                .innerText =
+                "1";
+
+
+            generateQuizQuestion();
+
+        }
+
+
+        // ==========================================
+        // GENERATE QUIZ QUESTION
+        // ==========================================
+
+        async function generateQuizQuestion() {
+
+            const questionBox =
+                document.getElementById(
+                    "quizQuestion"
+                );
+
+
+            const feedback =
+                document.getElementById(
+                    "quizFeedback"
+                );
+
+
+            const submitButton =
+                document.getElementById(
+                    "submitQuizButton"
+                );
+
+
+            const nextButton =
+                document.getElementById(
+                    "nextQuizButton"
+                );
+
+
+            questionAlreadyAnswered =
+                false;
+
+
+            currentQuiz = null;
+
+
+            questionBox.innerText =
+                "🤔 NOVA is preparing your question...";
+
+
+            feedback.innerText =
+                "";
+
+
+            submitButton.disabled =
+                false;
+
+
+            nextButton.disabled =
+                true;
+
+
+            document
+                .getElementById(
+                    "quizAnswer"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "quizNumber"
+                )
+                .innerText =
+                quizQuestionNumber;
+
+
+            const prompt = `
+
+You are NOVA Study Mode.
+
+Create ONE beginner-friendly quiz question.
+
+Topic:
+${studyTopic}
+
+Question number:
+${quizQuestionNumber}
+
+Return EXACTLY this format:
+
+QUESTION: <question>
+ANSWER: <correct answer>
+EXPLANATION: <short beginner-friendly explanation>
+
+Rules:
+
+- Ask exactly ONE question.
+- Keep it beginner-friendly.
+- Do not use multiple-choice.
+- Keep the question reasonably short.
+- The ANSWER must be correct.
+- The EXPLANATION should help the student understand.
+- Do not add anything before QUESTION.
+- Do not add anything after EXPLANATION.
+
+`;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        prompt,
+
+                                    history: []
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Failed to generate question"
+                    );
+
+                }
+
+
+                const aiResponse =
+                    data.answer;
+
+
+                console.log(
+                    "🧠 Quiz response:",
+                    aiResponse
+                );
+
+
+                // ==================================
+                // EXTRACT QUESTION
+                // ==================================
+
+                const questionMatch =
+                    aiResponse.match(
+                        /QUESTION:\s*([\s\S]*?)\s*ANSWER:/i
+                    );
+
+
+                // ==================================
+                // EXTRACT ANSWER
+                // ==================================
+
+                const answerMatch =
+                    aiResponse.match(
+                        /ANSWER:\s*([\s\S]*?)\s*EXPLANATION:/i
+                    );
+
+
+                // ==================================
+                // EXTRACT EXPLANATION
+                // ==================================
+
+                const explanationMatch =
+                    aiResponse.match(
+                        /EXPLANATION:\s*([\s\S]*)/i
+                    );
+
+
+                if (
+                    !questionMatch ||
+                    !answerMatch ||
+                    !explanationMatch
+                ) {
+
+                    console.error(
+                        "❌ Invalid quiz response:",
+                        aiResponse
+                    );
+
+
+                    throw new Error(
+                        "Invalid quiz format"
+                    );
+
+                }
+
+
+                // ==================================
+                // SAVE CURRENT QUIZ
+                // ==================================
+
+                currentQuiz = {
+
+                    question:
+                        questionMatch[1].trim(),
+
+                    answer:
+                        answerMatch[1].trim(),
+
+                    explanation:
+                        explanationMatch[1].trim()
+
+                };
+
+
+                console.log(
+                    "❓ Question:",
+                    currentQuiz.question
+                );
+
+
+                console.log(
+                    "✅ Correct answer:",
+                    currentQuiz.answer
+                );
+
+
+                console.log(
+                    "💡 Explanation:",
+                    currentQuiz.explanation
+                );
+
+
+                // ==================================
+                // SHOW ONLY QUESTION
+                // ==================================
+
+                questionBox.innerText =
+                    "❓ " +
+                    currentQuiz.question;
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "Quiz question error:",
+                    error
+                );
+
+
+                questionBox.innerText =
+                    "❌ Could not generate question.";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // SUBMIT QUIZ ANSWER
+        // ==========================================
+
+        async function submitQuizAnswer() {
+
+            const answer =
+                document
+                    .getElementById(
+                        "quizAnswer"
+                    )
+                    .value
+                    .trim();
+
+
+            if (!answer) {
+
+                alert(
+                    "Please enter your answer."
+                );
+
+                return;
+
+            }
+
+
+            // ==================================
+            // CHECK CURRENT QUIZ
+            // ==================================
+
+            if (!currentQuiz) {
+
+                alert(
+                    "Please wait for NOVA to generate a question."
+                );
+
+                return;
+
+            }
+
+
+            // ==================================
+            // PREVENT DOUBLE ANSWER
+            // ==================================
+
+            if (questionAlreadyAnswered) {
+
+                alert(
+                    "You already answered this question. Click Next Question."
+                );
+
+                return;
+
+            }
+
+
+            questionAlreadyAnswered =
+                true;
+
+
+            const submitButton =
+                document.getElementById(
+                    "submitQuizButton"
+                );
+
+
+            const nextButton =
+                document.getElementById(
+                    "nextQuizButton"
+                );
+
+
+            submitButton.disabled =
+                true;
+
+
+            nextButton.disabled =
+                true;
+
+
+            const question =
+                currentQuiz.question;
+
+
+            const correctAnswer =
+                currentQuiz.answer;
+
+
+            const explanation =
+                currentQuiz.explanation;
+
+
+            // ==================================
+            // EVALUATION PROMPT
+            // ==================================
+
+            const prompt = `
+
+You are NOVA Quiz Evaluator.
+
+Topic:
+${studyTopic}
+
+Question:
+${question}
+
+Correct answer:
+${correctAnswer}
+
+Student answer:
+${answer}
+
+Determine whether the student's answer is correct.
+
+Be reasonable about different wording that means the same thing.
+
+For example:
+
+Correct answer:
+A variable stores a value.
+
+Student answer:
+A variable is used to store data.
+
+This should be considered CORRECT.
+
+Return EXACTLY:
+
+RESULT: CORRECT
+FEEDBACK: <short beginner-friendly feedback>
+
+OR
+
+RESULT: INCORRECT
+FEEDBACK: <short beginner-friendly feedback>
+
+Do not use any other RESULT value.
+
+`;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        prompt,
+
+                                    history: []
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Evaluation failed"
+                    );
+
+                }
+
+
+                const result =
+                    data.answer;
+
+
+                console.log(
+                    "📝 Quiz evaluation:",
+                    result
+                );
+
+
+                // ==================================
+                // CHECK RESULT
+                // ==================================
+
+                const isCorrect =
+                    /^\s*RESULT:\s*CORRECT\b/im
+                        .test(result);
+
+
+                const feedbackMatch =
+                    result.match(
+                        /FEEDBACK:\s*([\s\S]*)/i
+                    );
+
+
+                const feedback =
+                    feedbackMatch
+                        ? feedbackMatch[1].trim()
+                        : result;
+
+
+                // ==================================
+                // CORRECT
+                // ==================================
+
+                if (isCorrect) {
+
+                    quizScore++;
+
+
+                    document
+                        .getElementById(
+                            "quizFeedback"
+                        )
+                        .innerText =
+                        "✅ Correct!\n\n" +
+                        feedback +
+                        "\n\n💡 " +
+                        explanation;
+
+
+                    document
+                        .getElementById(
+                            "quizScore"
+                        )
+                        .innerText =
+                        "📊 Score: " +
+                        quizScore;
+
+                }
+
+
+                // ==================================
+                // INCORRECT
+                // ==================================
+
+                else {
+
+                    document
+                        .getElementById(
+                            "quizFeedback"
+                        )
+                        .innerText =
+                        "❌ Not quite.\n\n" +
+                        feedback +
+                        "\n\n" +
+                        "✅ Correct answer: " +
+                        correctAnswer +
+                        "\n\n" +
+                        "💡 " +
+                        explanation;
+
+                }
+
+
+                // Enable next question
+
+                nextButton.disabled =
+                    false;
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "Quiz evaluation error:",
+                    error
+                );
+
+
+                questionAlreadyAnswered =
+                    false;
+
+
+                submitButton.disabled =
+                    false;
+
+
+                document
+                    .getElementById(
+                        "quizFeedback"
+                    )
+                    .innerText =
+                    "❌ Could not evaluate the answer.";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // NEXT QUESTION
+        // ==========================================
+
+        function nextQuizQuestion() {
+
+            if (!currentQuiz) {
+
+                return;
+
+            }
+
+
+            quizQuestionNumber++;
+
+
+            currentQuiz = null;
+
+
+            questionAlreadyAnswered =
+                false;
+
+
+            generateQuizQuestion();
+
+        }
+
+
+        // ==========================================
+        // EXIT STUDY MODE
+        // ==========================================
+
+        function exitStudyMode() {
+
+            studyMode = false;
+
+            studyTopic = "";
+
+            quizScore = 0;
+
+            quizQuestionNumber = 0;
+
+            currentQuiz = null;
+
+            questionAlreadyAnswered =
+                false;
+
+
+            document
+                .getElementById(
+                    "studyStart"
+                )
+                .style.display =
+                "block";
+
+
+            document
+                .getElementById(
+                    "quizArea"
+                )
+                .style.display =
+                "none";
+
+
+            document
+                .getElementById(
+                    "studyTopic"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "quizAnswer"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "quizFeedback"
+                )
+                .innerText = "";
+
+
+            document
+                .getElementById(
+                    "quizQuestion"
+                )
+                .innerText =
+                "Loading question...";
+
+
+            document
+                .getElementById(
+                    "quizNumber"
+                )
+                .innerText =
+                "1";
+
+        }
+
+
+        // ==========================================
+        // ENTER KEY FOR MAIN QUESTION
+        // ==========================================
+
+        questionInput.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    askAI();
+
+                }
+
+            }
+        );
+
+
+        // ==========================================
+        // ENTER KEY FOR QUIZ ANSWER
+        // ==========================================
+
+        document
+            .getElementById(
+                "quizAnswer"
+            )
+            .addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (
+                        event.key === "Enter"
+                    ) {
+
+                        submitQuizAnswer();
+
+                    }
+
+                }
+            );
+
+
+    </script>
+
+</body>
+
+</html>

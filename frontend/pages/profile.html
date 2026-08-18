@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+    <div class="navbar">
+
+        <div class="logo">🚀 NOVA</div>
+
+        <div class="title">👤 My Profile</div>
+
+        <button class="settings-icon" onclick="goToSettings()">
+            ⚙️
+        </button>
+
+    </div>
+
+    <div class="center">
+
+        <h1>👤 Profile Photo</h1>
+
+        <h2>Somasunder</h2>
+
+        <h3>CSE Student</h3>
+
+        <br>
+
+        <div class="card info-card">
+
+            <p>📧 Email: somasunder@gmail.com</p>
+
+            <p>🎓 Course: Computer Science</p>
+
+            <p>🏆 Level: Explorer</p>
+
+            <p>⚡ Focus Score: 92%</p>
+
+        </div>
+
+        <br>
+
+        <div class="profile-boxes">
+
+            <div class="card small-card">
+
+                <h3>📊 Study Stats</h3>
+
+                <p>Study: 18 hrs</p>
+
+                <p>Tasks: 21</p>
+
+                <p>Courses: 4</p>
+
+            </div>
+
+            <div class="card small-card">
+
+                <h3>🎯 Achievements</h3>
+
+                <p>🥇 7-day streak</p>
+
+                <p>📚 Completed 50 tasks</p>
+
+                <p>⭐ Top Learner</p>
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn">Edit Profile</button>
+
+        <br><br>
+
+        <button class="btn" onclick="goToSettings()">
+            ⚙️ Settings
+        </button>
+
+    </div>
+
+    <script>
+
+        function goToSettings() {
+            window.location.assign("./settings.html");
+        }
+
+    </script>
+
+</body>
+
+</html>

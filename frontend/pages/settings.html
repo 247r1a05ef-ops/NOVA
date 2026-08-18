@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Settings - NOVA</title>
+
+    <link rel="stylesheet" href="../../style.css">
+
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <div class="navbar">
+
+        <div class="logo">
+            🚀 NOVA
+        </div>
+
+        <div class="title">
+            ⚙️ Settings
+        </div>
+
+        <div class="profile">
+            👤
+        </div>
+
+    </div>
+
+
+    <!-- ================= SETTINGS ================= -->
+
+    <div class="settings-container">
+
+
+        <!-- ================= DARK MODE ================= -->
+
+        <div class="setting-row">
+
+            <span>
+                🌙 Dark Mode
+            </span>
+
+            <button
+                id="darkModeBtn"
+                class="dark-btn"
+                onclick="toggleDarkMode()">
+
+                ☀️ OFF
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= NOTIFICATIONS ================= -->
+
+        <div class="setting-row">
+
+            <span>
+                🔔 Notifications
+            </span>
+
+            <button
+                id="notificationBtn"
+                class="dark-btn"
+                onclick="toggleNotifications()">
+
+                🔔 ON
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= LANGUAGE ================= -->
+
+        <div class="setting-row">
+
+            <span>
+                🌐 Language
+            </span>
+
+            <select
+                id="languageSelect"
+                class="select-box"
+                onchange="changeLanguage()">
+
+                <option value="English">
+                    English
+                </option>
+
+                <option value="Telugu">
+                    Telugu
+                </option>
+
+                <option value="Hindi">
+                    Hindi
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ================= PRIVACY ================= -->
+
+        <div class="setting-row">
+
+            <span>
+                🔒 Privacy
+            </span>
+
+            <button
+                class="dark-btn"
+                onclick="privacyMessage()">
+
+                Manage
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= THEME ================= -->
+
+        <div class="setting-row">
+
+            <span>
+                🎨 Theme
+            </span>
+
+            <select
+                id="themeSelect"
+                class="select-box"
+                onchange="changeTheme()">
+
+                <option value="sky">
+                    Sky Blue
+                </option>
+
+                <option value="green">
+                    Green
+                </option>
+
+                <option value="purple">
+                    Purple
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ================= LOGOUT ================= -->
+
+        <div class="setting-row">
+
+            <span>
+                🚪 Logout
+            </span>
+
+            <button
+                class="logout-btn"
+                onclick="logout()">
+
+                Logout
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script>
+
+
+        // ==========================================
+        // LOAD SETTINGS
+        // ==========================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                loadDarkMode();
+
+                loadTheme();
+
+                loadNotifications();
+
+                loadLanguage();
+
+            }
+        );
+
+
+        // ==========================================
+        // DARK MODE
+        // ==========================================
+
+        function loadDarkMode() {
+
+            const darkButton =
+                document.getElementById("darkModeBtn");
+
+            const savedDarkMode =
+                localStorage.getItem("darkMode");
+
+
+            if (savedDarkMode === "on") {
+
+                document.body.classList.add("dark-mode");
+
+                darkButton.innerText = "🌙 ON";
+
+            }
+
+            else {
+
+                document.body.classList.remove("dark-mode");
+
+                darkButton.innerText = "☀️ OFF";
+
+            }
+
+        }
+
+
+        function toggleDarkMode() {
+
+            const darkButton =
+                document.getElementById("darkModeBtn");
+
+
+            document.body.classList.toggle("dark-mode");
+
+
+            if (
+                document.body.classList.contains("dark-mode")
+            ) {
+
+                localStorage.setItem(
+                    "darkMode",
+                    "on"
+                );
+
+                darkButton.innerText =
+                    "🌙 ON";
+
+            }
+
+            else {
+
+                localStorage.setItem(
+                    "darkMode",
+                    "off"
+                );
+
+                darkButton.innerText =
+                    "☀️ OFF";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // THEME
+        // ==========================================
+
+        function loadTheme() {
+
+            const themeSelect =
+                document.getElementById("themeSelect");
+
+
+            const savedTheme =
+                localStorage.getItem("novaTheme");
+
+
+            if (savedTheme) {
+
+                themeSelect.value =
+                    savedTheme;
+
+                applyTheme(savedTheme);
+
+            }
+
+            else {
+
+                themeSelect.value =
+                    "sky";
+
+                applyTheme("sky");
+
+            }
+
+        }
+
+
+        function changeTheme() {
+
+            const themeSelect =
+                document.getElementById("themeSelect");
+
+
+            const selectedTheme =
+                themeSelect.value;
+
+
+            localStorage.setItem(
+                "novaTheme",
+                selectedTheme
+            );
+
+
+            applyTheme(selectedTheme);
+
+        }
+
+
+        function applyTheme(theme) {
+
+            document.body.classList.remove(
+                "theme-sky",
+                "theme-green",
+                "theme-purple"
+            );
+
+
+            if (theme === "green") {
+
+                document.body.classList.add(
+                    "theme-green"
+                );
+
+            }
+
+            else if (theme === "purple") {
+
+                document.body.classList.add(
+                    "theme-purple"
+                );
+
+            }
+
+            else {
+
+                document.body.classList.add(
+                    "theme-sky"
+                );
+
+            }
+
+        }
+
+
+        // ==========================================
+        // NOTIFICATIONS
+        // ==========================================
+
+        function loadNotifications() {
+
+            const button =
+                document.getElementById(
+                    "notificationBtn"
+                );
+
+
+            const saved =
+                localStorage.getItem(
+                    "notifications"
+                );
+
+
+            if (saved === "off") {
+
+                button.innerText =
+                    "🔕 OFF";
+
+            }
+
+            else {
+
+                button.innerText =
+                    "🔔 ON";
+
+            }
+
+        }
+
+
+        function toggleNotifications() {
+
+            const button =
+                document.getElementById(
+                    "notificationBtn"
+                );
+
+
+            const current =
+                localStorage.getItem(
+                    "notifications"
+                );
+
+
+            if (current === "off") {
+
+                localStorage.setItem(
+                    "notifications",
+                    "on"
+                );
+
+                button.innerText =
+                    "🔔 ON";
+
+            }
+
+            else {
+
+                localStorage.setItem(
+                    "notifications",
+                    "off"
+                );
+
+                button.innerText =
+                    "🔕 OFF";
+
+            }
+
+        }
+
+
+        // ==========================================
+        // LANGUAGE
+        // ==========================================
+
+        function loadLanguage() {
+
+            const languageSelect =
+                document.getElementById(
+                    "languageSelect"
+                );
+
+
+            const savedLanguage =
+                localStorage.getItem(
+                    "novaLanguage"
+                );
+
+
+            if (savedLanguage) {
+
+                languageSelect.value =
+                    savedLanguage;
+
+            }
+
+        }
+
+
+        function changeLanguage() {
+
+            const languageSelect =
+                document.getElementById(
+                    "languageSelect"
+                );
+
+
+            localStorage.setItem(
+                "novaLanguage",
+                languageSelect.value
+            );
+
+        }
+
+
+        // ==========================================
+        // PRIVACY
+        // ==========================================
+
+        function privacyMessage() {
+
+            alert(
+                "🔒 Your NOVA settings are stored locally in your browser."
+            );
+
+        }
+
+
+        // ==========================================
+        // LOGOUT
+        // ==========================================
+
+        function logout() {
+
+            localStorage.clear();
+
+            alert(
+                "Logged out successfully!"
+            );
+
+            window.location.href =
+                "../index.html";
+
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Ask NOVA - AI Assistant</title>
+
+    <link rel="stylesheet" href="../style.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <div class="navbar">
+
+        <div class="logo">
+            🚀 NOVA
+        </div>
+
+        <div class="nav-links">
+
+            <span onclick="goToDashboard()">
+                🏠 Dashboard
+            </span>
+
+            <span onclick="goToPlanner()">
+                📅 Planner
+            </span>
+
+            <span onclick="goToAssistant()">
+                🤖 Ask NOVA
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main style="
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 20px;
+    ">
+
+
+        <!-- HEADER -->
+
+        <div style="
+            margin-bottom: 25px;
+        ">
+
+            <h1>
+                🤖 Ask NOVA
+            </h1>
+
+            <p style="
+                color: #64748b;
+                margin-top: 8px;
+            ">
+                Ask me anything about Python, DSA,
+                mathematics, programming and more.
+            </p>
+
+        </div>
+
+
+
+        <!-- =================================================
+             CHAT BOX
+             ================================================= -->
+
+        <div
+            id="chatMessages"
+            class="chat-messages"
+        >
+
+            <div class="nova-message">
+
+                🤖 <strong>NOVA:</strong>
+
+                <p>
+                    Hello! 👋 I'm NOVA.
+
+                    <br>
+
+                    Ask me anything you want to learn.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             INPUT
+             ================================================= -->
+
+        <div class="chat-input">
+
+            <input
+                type="text"
+                id="questionInput"
+                placeholder="Ask NOVA anything..."
+                autocomplete="off"
+            >
+
+            <button
+                type="button"
+                id="sendButton"
+                onclick="askNOVA()"
+            >
+                Send 🚀
+            </button>
+
+        </div>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+
+
+        // =====================================================
+        // ENTER KEY
+        // =====================================================
+
+        document
+            .getElementById("questionInput")
+            .addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (event.key === "Enter") {
+
+                        askNOVA();
+
+                    }
+
+                }
+            );
+
+
+
+        // =====================================================
+        // ASK NOVA
+        // =====================================================
+
+        async function askNOVA() {
+
+
+            const input =
+                document.getElementById(
+                    "questionInput"
+                );
+
+
+            const chatMessages =
+                document.getElementById(
+                    "chatMessages"
+                );
+
+
+            const sendButton =
+                document.getElementById(
+                    "sendButton"
+                );
+
+
+            const question =
+                input.value.trim();
+
+
+
+            // =================================================
+            // EMPTY QUESTION
+            // =================================================
+
+            if (question === "") {
+
+                return;
+
+            }
+
+
+
+            // =================================================
+            // SHOW USER MESSAGE
+            // =================================================
+
+            const userMessage =
+                document.createElement("div");
+
+
+            userMessage.className =
+                "user-message";
+
+
+            userMessage.innerHTML = `
+                <strong>You:</strong>
+                <p>${escapeHTML(question)}</p>
+            `;
+
+
+            chatMessages.appendChild(
+                userMessage
+            );
+
+
+
+            // Clear input
+
+            input.value = "";
+
+
+
+            // Disable button
+
+            sendButton.disabled = true;
+
+            sendButton.innerText =
+                "Thinking...";
+
+
+
+            // =================================================
+            // TYPING MESSAGE
+            // =================================================
+
+            const typingMessage =
+                document.createElement("div");
+
+
+            typingMessage.className =
+                "nova-message";
+
+
+            typingMessage.id =
+                "typingMessage";
+
+
+            typingMessage.innerHTML = `
+                🤖 <strong>NOVA:</strong>
+
+                <p>
+                    <span class="typing">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </p>
+            `;
+
+
+            chatMessages.appendChild(
+                typingMessage
+            );
+
+
+            chatMessages.scrollTop =
+                chatMessages.scrollHeight;
+
+
+
+            // =================================================
+            // SEND TO BACKEND
+            // =================================================
+
+            try {
+
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        question,
+
+                                    history: []
+
+                                })
+
+                        }
+                    );
+
+
+
+                const data =
+                    await response.json();
+
+
+
+                // Remove typing
+
+                typingMessage.remove();
+
+
+
+                // =================================================
+                // ERROR
+                // =================================================
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI request failed"
+                    );
+
+                }
+
+
+
+                // =================================================
+                // NOVA RESPONSE
+                // =================================================
+
+                const novaMessage =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                novaMessage.className =
+                    "nova-message";
+
+
+                novaMessage.innerHTML = `
+                    🤖 <strong>NOVA:</strong>
+
+                    <p>
+                        ${formatAnswer(data.answer)}
+                    </p>
+                `;
+
+
+                chatMessages.appendChild(
+                    novaMessage
+                );
+
+
+
+                // =================================================
+                // QUESTION COUNT
+                // =================================================
+
+                let count =
+                    Number(
+                        localStorage.getItem(
+                            "novaQuestionCount"
+                        )
+                    ) || 0;
+
+
+                count++;
+
+
+                localStorage.setItem(
+                    "novaQuestionCount",
+                    count
+                );
+
+
+
+            }
+
+            catch (error) {
+
+
+                console.error(
+                    "NOVA Error:",
+                    error
+                );
+
+
+                typingMessage.remove();
+
+
+                const errorMessage =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                errorMessage.className =
+                    "error-message";
+
+
+                errorMessage.innerText =
+                    "❌ NOVA could not answer right now. Please make sure the backend server is running.";
+
+
+                chatMessages.appendChild(
+                    errorMessage
+                );
+
+            }
+
+
+
+            // =================================================
+            // ENABLE BUTTON
+            // =================================================
+
+            sendButton.disabled =
+                false;
+
+
+            sendButton.innerText =
+                "Send 🚀";
+
+
+            input.focus();
+
+
+            chatMessages.scrollTop =
+                chatMessages.scrollHeight;
+
+        }
+
+
+
+        // =====================================================
+        // FORMAT AI ANSWER
+        // =====================================================
+
+        function formatAnswer(answer) {
+
+            if (!answer) {
+
+                return "Sorry, I couldn't generate an answer.";
+
+            }
+
+
+            return escapeHTML(answer)
+                .replace(/\n/g, "<br>");
+
+        }
+
+
+
+        // =====================================================
+        // SECURITY
+        // =====================================================
+
+        function escapeHTML(text) {
+
+            const div =
+                document.createElement("div");
+
+
+            div.textContent =
+                text;
+
+
+            return div.innerHTML;
+
+        }
+
+
+
+        // =====================================================
+        // NAVIGATION
+        // =====================================================
+
+        function goToDashboard() {
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+
+
+        function goToPlanner() {
+
+            window.location.href =
+                "planner.html";
+
+        }
+
+
+        function goToAssistant() {
+
+            window.location.href =
+                "assistant.html";
+
+        }
+
+
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login - NOVA</title>
+
+    <!-- style.css is one folder above pages/ -->
+    <link rel="stylesheet" href="../style.css">
+
+</head>
+
+
+<body>
+
+    <div class="login-container">
+
+        <div class="login-card">
+
+            <h1>🚀 NOVA</h1>
+
+            <h2>Welcome Back!</h2>
+
+            <p>
+                Login to continue your learning journey.
+            </p>
+
+
+            <br>
+
+
+            <!-- EMAIL -->
+
+            <input
+                type="email"
+                id="email"
+                class="input-box"
+                placeholder="Enter your email"
+            >
+
+
+            <br><br>
+
+
+            <!-- PASSWORD -->
+
+            <input
+                type="password"
+                id="password"
+                class="input-box"
+                placeholder="Enter your password"
+            >
+
+
+            <br><br>
+
+
+            <!-- LOGIN BUTTON -->
+
+            <button
+                class="login-btn"
+                onclick="goToDashboard()"
+            >
+                🚀 Login
+            </button>
+
+
+            <p id="loginMessage"></p>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function goToDashboard() {
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value.trim();
+
+            const message =
+                document.getElementById("loginMessage");
+
+
+            // Check email
+
+            if (email === "") {
+
+                message.innerText =
+                    "⚠️ Please enter your email.";
+
+                return;
+
+            }
+
+
+            // Check password
+
+            if (password === "") {
+
+                message.innerText =
+                    "⚠️ Please enter your password.";
+
+                return;
+
+            }
+
+
+            // Save user's email
+
+            localStorage.setItem(
+                "novaUserEmail",
+                email
+            );
+
+
+            // Go to Dashboard
+
+           window.location.href = "dashboard.html";
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>

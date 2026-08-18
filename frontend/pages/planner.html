@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Study Planner - NOVA</title>
+
+    <link rel="stylesheet" href="../style.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <div class="navbar">
+
+        <div
+            class="logo"
+            onclick="goToDashboard()"
+        >
+            🚀 NOVA
+        </div>
+
+
+        <div class="title">
+            📅 Study Planner
+        </div>
+
+
+        <div
+            class="profile"
+            onclick="goToDashboard()"
+            style="cursor:pointer;"
+        >
+            👤
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         GREETING
+         ===================================================== -->
+
+    <div class="greeting">
+
+        <h2>
+            👋 Welcome to your Study Planner
+        </h2>
+
+        <p>
+            🎯 Plan your tasks and track your progress with NOVA.
+        </p>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         TODAY'S SCHEDULE
+         ===================================================== -->
+
+    <div class="card schedule-card">
+
+        <h2>
+            📚 Today's Schedule
+        </h2>
+
+        <br>
+
+        <p>
+            ⏰ 09:00 AM → Python
+        </p>
+
+        <p>
+            ⏰ 11:00 AM → React
+        </p>
+
+        <p>
+            ⏰ 03:00 PM → DSA
+        </p>
+
+        <p>
+            ⏰ 07:00 PM → Revision
+        </p>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PROGRESS + AI
+         ===================================================== -->
+
+    <div class="bottom-section">
+
+
+        <!-- =================================================
+             PROGRESS
+             ================================================= -->
+
+        <div class="card progress-card">
+
+            <h2>
+                📈 Your Progress
+            </h2>
+
+            <br>
+
+
+            <div class="progress">
+
+                <div
+                    class="progress-fill"
+                    id="progressFill"
+                ></div>
+
+            </div>
+
+
+            <br>
+
+
+            <h3 id="progressText">
+                0%
+            </h3>
+
+
+            <p id="progressDetails">
+                No tasks yet
+            </p>
+
+        </div>
+
+
+
+        <!-- =================================================
+             AI RECOMMENDATION
+             ================================================= -->
+
+        <div
+            class="card ai-card"
+            onclick="getAIRecommendation()"
+            style="cursor:pointer;"
+        >
+
+            <h2>
+                🤖 AI Recommendation
+            </h2>
+
+            <br>
+
+
+            <p id="aiRecommendation">
+
+                Click here and NOVA will analyze your
+                tasks and recommend what to study next.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ADD TASK
+         ===================================================== -->
+
+    <div class="add-task">
+
+        <h2>
+            ➕ Add New Task
+        </h2>
+
+        <br>
+
+
+        <input
+            type="text"
+            id="taskInput"
+            class="input-box"
+            placeholder="Example: Complete Python arrays"
+            autocomplete="off"
+        >
+
+
+        <br><br>
+
+
+        <button
+            class="btn"
+            onclick="addTask()"
+        >
+            ➕ Add Task
+        </button>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         TASK LIST
+         ===================================================== -->
+
+    <div class="card">
+
+        <h2>
+            ✅ My Tasks
+        </h2>
+
+        <br>
+
+
+        <p id="taskSummary">
+            No tasks yet.
+        </p>
+
+
+        <br>
+
+
+        <ul id="taskList"></ul>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+
+
+        // =====================================================
+        // PAGE LOAD
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                loadTheme();
+
+                loadDarkMode();
+
+                loadTasks();
+
+                updateProgress();
+
+
+                const input =
+                    document.getElementById(
+                        "taskInput"
+                    );
+
+
+                input.addEventListener(
+                    "keypress",
+                    function (event) {
+
+                        if (
+                            event.key === "Enter"
+                        ) {
+
+                            addTask();
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+
+        // =====================================================
+        // GO TO DASHBOARD
+        // =====================================================
+
+        function goToDashboard() {
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+
+
+
+        // =====================================================
+        // LOAD DARK MODE
+        // =====================================================
+
+        function loadDarkMode() {
+
+            const theme =
+                localStorage.getItem("theme");
+
+
+            const darkMode =
+                localStorage.getItem("darkMode");
+
+
+            if (
+                theme === "dark" ||
+                darkMode === "on"
+            ) {
+
+                document.body.classList.add(
+                    "dark-mode"
+                );
+
+            }
+
+            else {
+
+                document.body.classList.remove(
+                    "dark-mode"
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // LOAD THEME
+        // =====================================================
+
+        function loadTheme() {
+
+            const savedTheme =
+                localStorage.getItem(
+                    "novaTheme"
+                );
+
+
+            document.body.classList.remove(
+                "theme-sky",
+                "theme-green",
+                "theme-purple"
+            );
+
+
+            if (
+                savedTheme === "green"
+            ) {
+
+                document.body.classList.add(
+                    "theme-green"
+                );
+
+            }
+
+            else if (
+                savedTheme === "purple"
+            ) {
+
+                document.body.classList.add(
+                    "theme-purple"
+                );
+
+            }
+
+            else {
+
+                document.body.classList.add(
+                    "theme-sky"
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // LOAD TASKS
+        // =====================================================
+
+        function loadTasks() {
+
+            const savedTasks =
+                localStorage.getItem(
+                    "tasks"
+                );
+
+
+            const taskList =
+                document.getElementById(
+                    "taskList"
+                );
+
+
+            taskList.innerHTML = "";
+
+
+            if (!savedTasks) {
+
+                updateProgress();
+
+                return;
+
+            }
+
+
+            /*
+             * Your existing project stores the task
+             * HTML directly inside localStorage.
+             *
+             * We keep that format so the dashboard
+             * continues to work with the planner.
+             */
+
+            taskList.innerHTML =
+                savedTasks;
+
+
+            updateProgress();
+
+        }
+
+
+
+        // =====================================================
+        // ADD TASK
+        // =====================================================
+
+        function addTask() {
+
+            const input =
+                document.getElementById(
+                    "taskInput"
+                );
+
+
+            const taskText =
+                input.value.trim();
+
+
+            // Empty task check
+
+            if (
+                taskText === ""
+            ) {
+
+                alert(
+                    "⚠️ Please enter a task first."
+                );
+
+                input.focus();
+
+                return;
+
+            }
+
+
+            // Create task
+
+            const li =
+                document.createElement(
+                    "li"
+                );
+
+
+            // Task text
+
+            const span =
+                document.createElement(
+                    "span"
+                );
+
+
+            span.innerText =
+                taskText;
+
+
+            span.style.cursor =
+                "pointer";
+
+
+            span.title =
+                "Click to complete task";
+
+
+            span.onclick =
+                function () {
+
+                    completeTask(
+                        span
+                    );
+
+                };
+
+
+            // Buttons container
+
+            const buttons =
+                document.createElement(
+                    "div"
+                );
+
+
+            buttons.className =
+                "task-buttons";
+
+
+            // Edit button
+
+            const editButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            editButton.innerText =
+                "✏️";
+
+
+            editButton.className =
+                "edit-btn";
+
+
+            editButton.onclick =
+                function () {
+
+                    editTask(
+                        editButton
+                    );
+
+                };
+
+
+            // Delete button
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            deleteButton.innerText =
+                "❌";
+
+
+            deleteButton.className =
+                "delete-btn";
+
+
+            deleteButton.onclick =
+                function () {
+
+                    deleteTask(
+                        deleteButton
+                    );
+
+                };
+
+
+            // Add buttons
+
+            buttons.appendChild(
+                editButton
+            );
+
+
+            buttons.appendChild(
+                deleteButton
+            );
+
+
+            // Add elements to task
+
+            li.appendChild(
+                span
+            );
+
+
+            li.appendChild(
+                buttons
+            );
+
+
+            // Add task to list
+
+            document.getElementById(
+                "taskList"
+            ).appendChild(
+                li
+            );
+
+
+            // Save
+
+            saveTasks();
+
+
+            // Update progress
+
+            updateProgress();
+
+
+            // Clear input
+
+            input.value = "";
+
+
+            input.focus();
+
+        }
+
+
+
+        // =====================================================
+        // DELETE TASK
+        // =====================================================
+
+        function deleteTask(button) {
+
+            const task =
+                button.parentElement
+                    .parentElement;
+
+
+            const taskName =
+                task.querySelector(
+                    "span"
+                )?.innerText ||
+                "this task";
+
+
+            const confirmDelete =
+                confirm(
+                    "Delete task:\n\n" +
+                    taskName +
+                    "?"
+                );
+
+
+            if (!confirmDelete) {
+
+                return;
+
+            }
+
+
+            task.remove();
+
+
+            saveTasks();
+
+
+            updateProgress();
+
+        }
+
+
+
+        // =====================================================
+        // EDIT TASK
+        // =====================================================
+
+        function editTask(button) {
+
+            const task =
+                button.parentElement
+                    .parentElement;
+
+
+            const taskSpan =
+                task.querySelector(
+                    "span"
+                );
+
+
+            if (!taskSpan) {
+
+                return;
+
+            }
+
+
+            const oldTask =
+                taskSpan.innerText;
+
+
+            const newTask =
+                prompt(
+                    "✏️ Edit your task:",
+                    oldTask
+                );
+
+
+            if (
+                newTask !== null &&
+                newTask.trim() !== ""
+            ) {
+
+                taskSpan.innerText =
+                    newTask.trim();
+
+
+                saveTasks();
+
+
+                updateProgress();
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // COMPLETE TASK
+        // =====================================================
+
+        function completeTask(taskSpan) {
+
+            const task =
+                taskSpan.parentElement;
+
+
+            task.classList.toggle(
+                "completed"
+            );
+
+
+            if (
+                task.classList.contains(
+                    "completed"
+                )
+            ) {
+
+                taskSpan.style.textDecoration =
+                    "line-through";
+
+                taskSpan.style.opacity =
+                    "0.6";
+
+            }
+
+            else {
+
+                taskSpan.style.textDecoration =
+                    "none";
+
+                taskSpan.style.opacity =
+                    "1";
+
+            }
+
+
+            saveTasks();
+
+
+            updateProgress();
+
+        }
+
+
+
+        // =====================================================
+        // SAVE TASKS
+        // =====================================================
+
+        function saveTasks() {
+
+            const taskList =
+                document.getElementById(
+                    "taskList"
+                );
+
+
+            localStorage.setItem(
+
+                "tasks",
+
+                taskList.innerHTML
+
+            );
+
+        }
+
+
+
+        // =====================================================
+        // UPDATE PROGRESS
+        // =====================================================
+
+        function updateProgress() {
+
+            const tasks =
+                document.querySelectorAll(
+                    "#taskList li"
+                );
+
+
+            const completedTasks =
+                document.querySelectorAll(
+                    "#taskList li.completed"
+                );
+
+
+            const total =
+                tasks.length;
+
+
+            const completed =
+                completedTasks.length;
+
+
+            let percentage =
+                0;
+
+
+            if (
+                total > 0
+            ) {
+
+                percentage =
+                    Math.round(
+                        (
+                            completed /
+                            total
+                        ) *
+                        100
+                    );
+
+            }
+
+
+            // Progress bar
+
+            const progressFill =
+                document.getElementById(
+                    "progressFill"
+                );
+
+
+            if (progressFill) {
+
+                progressFill.style.width =
+                    percentage + "%";
+
+            }
+
+
+            // Progress percentage
+
+            const progressText =
+                document.getElementById(
+                    "progressText"
+                );
+
+
+            if (progressText) {
+
+                progressText.innerText =
+                    percentage + "%";
+
+            }
+
+
+            // Progress details
+
+            const progressDetails =
+                document.getElementById(
+                    "progressDetails"
+                );
+
+
+            if (progressDetails) {
+
+                if (total === 0) {
+
+                    progressDetails.innerText =
+                        "No tasks yet";
+
+                }
+
+                else {
+
+                    progressDetails.innerText =
+                        completed +
+                        " / " +
+                        total +
+                        " tasks completed";
+
+                }
+
+            }
+
+
+            // Task summary
+
+            const taskSummary =
+                document.getElementById(
+                    "taskSummary"
+                );
+
+
+            if (taskSummary) {
+
+                if (total === 0) {
+
+                    taskSummary.innerText =
+                        "No tasks yet. Add your first task above.";
+
+                }
+
+                else {
+
+                    const remaining =
+                        total -
+                        completed;
+
+
+                    taskSummary.innerText =
+                        total +
+                        " total task(s) • " +
+                        completed +
+                        " completed • " +
+                        remaining +
+                        " remaining";
+
+                }
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // AI RECOMMENDATION
+        // =====================================================
+
+        async function getAIRecommendation() {
+
+            const recommendation =
+                document.getElementById(
+                    "aiRecommendation"
+                );
+
+
+            recommendation.innerText =
+                "🤔 NOVA is analyzing your tasks...";
+
+
+            // Get tasks
+
+            const tasks =
+                document.querySelectorAll(
+                    "#taskList li"
+                );
+
+
+            const completedTasks =
+                document.querySelectorAll(
+                    "#taskList li.completed"
+                );
+
+
+            const total =
+                tasks.length;
+
+
+            const completed =
+                completedTasks.length;
+
+
+            const incompleteTasks =
+                Array.from(tasks)
+                    .filter(
+                        task =>
+                            !task.classList.contains(
+                                "completed"
+                            )
+                    )
+                    .map(
+                        task =>
+                            task.querySelector(
+                                "span"
+                            )?.innerText ||
+                            ""
+                    );
+
+
+            let taskInformation =
+                "No tasks have been added yet.";
+
+
+            if (
+                incompleteTasks.length > 0
+            ) {
+
+                taskInformation =
+                    incompleteTasks.join(
+                        ", "
+                    );
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:3000/ask",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        `You are NOVA, a study planner assistant.
+
+The student currently has:
+Total tasks: ${total}
+Completed tasks: ${completed}
+Incomplete tasks: ${incompleteTasks.length}
+
+Incomplete tasks:
+${taskInformation}
+
+Recommend what the student should study next.
+
+Give ONE practical recommendation.
+Keep it short, beginner-friendly and encouraging.
+Do not use unnecessary headings.`,
+
+                                    history: []
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI request failed"
+                    );
+
+                }
+
+
+                recommendation.innerText =
+                    data.answer;
+
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "NOVA AI Recommendation Error:",
+                    error
+                );
+
+
+                recommendation.innerText =
+                    "❌ NOVA could not generate a recommendation. Make sure the backend server is running.";
+
+            }
+
+        }
+
+
+
+        // =====================================================
+        // UPDATE AI RECOMMENDATION WHEN TASK CHANGES
+        // =====================================================
+
+        function refreshAIRecommendationText() {
+
+            const recommendation =
+                document.getElementById(
+                    "aiRecommendation"
+                );
+
+
+            if (recommendation) {
+
+                recommendation.innerText =
+                    "Click here and NOVA will analyze your current tasks.";
+
+            }
+
+        }
+
+
+    </script>
+
+
+</body>
+
+</html>
