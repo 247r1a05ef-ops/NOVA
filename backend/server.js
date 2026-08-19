@@ -1,4 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({
+    path: __dirname + "/.env"
+});
 
 const express = require("express");
 const cors = require("cors");
@@ -7,7 +9,7 @@ const rateLimit = require("express-rate-limit");
 const OpenAI = require("openai");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 
 // ==========================================
@@ -716,9 +718,7 @@ Return ONLY the suggestion.
 // START SERVER
 // ==========================================
 
-app.listen(
-    PORT,
-    () => {
+app.listen(PORT, "0.0.0.0", () => {
 
         console.log(
             "\n🚀 NOVA OpenRouter backend running at"
