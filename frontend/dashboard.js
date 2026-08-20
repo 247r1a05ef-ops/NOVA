@@ -2,7 +2,7 @@
 // NOVA DASHBOARD
 // ==========================================
 
-const API_URL = "http://localhost:3000/ask";
+const API_URL = "https://nova-0r36.onrender.com/ask";
 
 
 // ==========================================
