@@ -1,6 +1,4 @@
-require("dotenv").config({
-    path: __dirname + "/.env"
-});
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -9,244 +7,251 @@ const rateLimit = require("express-rate-limit");
 const OpenAI = require("openai");
 
 const app = express();
+
+// Render provides PORT automatically
 const PORT = process.env.PORT || 3000;
 
 
-// ==========================================
-// MIDDLEWARE / SECURITY
-// ==========================================
+// =====================================================
+// TRUST RENDER PROXY
+// =====================================================
 
-// Security headers
+app.set("trust proxy", 1);
+
+
+// =====================================================
+// SECURITY / MIDDLEWARE
+// =====================================================
+
 app.use(helmet());
 
 
-// Allow only local NOVA frontend
-app.use(cors({
-    origin: [
-        "http://localhost:5500",
-        "http://127.0.0.1:5500"
-    ]
-}));
+// =====================================================
+// CORS
+// =====================================================
 
+// During development your HTML may be opened using
+// file://, which gives the browser an origin of "null".
+//
+// origin: true reflects the requesting origin.
+// This allows both local development and the deployed
+// frontend while we are testing.
 
-// Limit request body size
 app.use(
-    express.json({
-        limit: "10kb"
+    cors({
+        origin: true,
+
+        methods: [
+            "GET",
+            "POST",
+            "OPTIONS"
+        ],
+
+        allowedHeaders: [
+            "Content-Type"
+        ]
     })
 );
 
 
-// ==========================================
-// RATE LIMITING
-// ==========================================
+// Explicitly handle CORS preflight requests
 
-// Limit AI requests to 20 per minute per IP
+
+
+// =====================================================
+// BODY PARSER
+// =====================================================
+
+app.use(express.json({
+    limit: "100kb"
+}));
+
+
+// =====================================================
+// RATE LIMITING
+// =====================================================
+
+// Protect AI endpoints from excessive requests.
 
 const aiLimiter = rateLimit({
 
-    windowMs: 60 * 1000,
+    windowMs: 15 * 60 * 1000,
 
-    limit: 20,
+    max: 30,
 
-    standardHeaders: "draft-8",
+    standardHeaders: true,
 
     legacyHeaders: false,
 
     message: {
-        error:
-            "Too many AI requests. Please wait a minute and try again."
+        error: "Too many AI requests. Please try again later."
     }
 
 });
 
 
-// Apply rate limit to both AI endpoints
-
-app.use("/ask", aiLimiter);
-
-app.use("/ai-suggestion", aiLimiter);
-
-
-// ==========================================
+// =====================================================
 // CHECK API KEY
-// ==========================================
+// =====================================================
 
 console.log(
-
     "🔑 OpenRouter API Key:",
-
     process.env.OPENROUTER_API_KEY
         ? "LOADED ✅"
         : "NOT FOUND ❌"
-
 );
 
 
-// ==========================================
+// =====================================================
 // OPENROUTER CLIENT
-// ==========================================
+// =====================================================
+
+if (!process.env.OPENROUTER_API_KEY) {
+
+    console.error(
+        "❌ OPENROUTER_API_KEY is missing."
+    );
+
+}
 
 const client = new OpenAI({
 
-    apiKey:
-        process.env.OPENROUTER_API_KEY,
+    apiKey: process.env.OPENROUTER_API_KEY,
 
-    baseURL:
-        "https://openrouter.ai/api/v1"
+    baseURL: "https://openrouter.ai/api/v1"
 
 });
 
 
-// ==========================================
+// =====================================================
 // TEST ROUTE
-// ==========================================
+// =====================================================
 
 app.get("/", (req, res) => {
 
-    res.send(
-        "🚀 NOVA OpenRouter AI Backend is running!"
-    );
+    res.json({
+
+        status: "online",
+
+        message:
+            "🚀 NOVA OpenRouter AI Backend is running!"
+
+    });
 
 });
 
 
-// ==========================================
+// =====================================================
+// HEALTH CHECK
+// =====================================================
+
+app.get("/health", (req, res) => {
+
+    res.json({
+
+        status: "ok",
+
+        service: "NOVA backend"
+
+    });
+
+});
+
+
+// =====================================================
 // ASK AI
-// ==========================================
+// =====================================================
 
-app.post("/ask", async (req, res) => {
+app.post(
+    "/ask",
+    aiLimiter,
+    async (req, res) => {
 
-    try {
+        try {
 
-        // ======================================
-        // GET + VALIDATE QUESTION
-        // ======================================
+            // =================================================
+            // CHECK API KEY
+            // =================================================
 
-        const question =
-            typeof req.body.question === "string"
-                ? req.body.question.trim()
-                : "";
+            if (!process.env.OPENROUTER_API_KEY) {
 
+                return res.status(500).json({
 
-        // ======================================
-        // CHECK QUESTION
-        // ======================================
+                    error:
+                        "OpenRouter API key is not configured."
 
-        if (!question) {
+                });
 
-            return res.status(400).json({
-
-                error:
-                    "Question is required"
-
-            });
-
-        }
+            }
 
 
-        // ======================================
-        // QUESTION LENGTH LIMIT
-        // ======================================
+            // =================================================
+            // GET DATA
+            // =================================================
 
-        if (question.length > 2000) {
+            const question =
+                typeof req.body.question === "string"
+                    ? req.body.question.trim()
+                    : "";
 
-            return res.status(400).json({
-
-                error:
-                    "Question is too long. Please keep it under 2000 characters."
-
-            });
-
-        }
-
-
-        // ======================================
-        // VALIDATE HISTORY
-        // ======================================
-
-        let history = [];
+            const history =
+                Array.isArray(req.body.history)
+                    ? req.body.history
+                    : [];
 
 
-        if (Array.isArray(req.body.history)) {
+            // =================================================
+            // CHECK QUESTION
+            // =================================================
 
-            history =
-                req.body.history
+            if (!question) {
 
-                    // Only allow valid messages
-                    .filter(function (message) {
+                return res.status(400).json({
 
-                        return (
+                    error:
+                        "Question is required."
 
-                            message &&
+                });
 
-                            typeof message === "object" &&
+            }
 
-                            (
-                                message.role === "user" ||
-                                message.role === "assistant"
-                            ) &&
 
-                            typeof message.content === "string"
+            // =================================================
+            // LIMIT HISTORY
+            // =================================================
 
-                        );
-
-                    })
-
-                    // Keep only latest 20 messages
+            const safeHistory =
+                history
+                    .filter(message =>
+                        message &&
+                        (message.role === "user" ||
+                         message.role === "assistant") &&
+                        typeof message.content === "string"
+                    )
                     .slice(-20);
 
-        }
+
+            console.log(
+                "\n👤 User asked:",
+                question
+            );
 
 
-        // ======================================
-        // LIMIT HISTORY MESSAGE SIZE
-        // ======================================
-
-        history =
-            history.map(function (message) {
-
-                return {
-
-                    role:
-                        message.role,
-
-                    content:
-                        message.content
-                            .trim()
-                            .slice(0, 2000)
-
-                };
-
-            });
+            console.log(
+                "🧠 Previous messages:",
+                safeHistory.length
+            );
 
 
-        // ======================================
-        // LOG REQUEST
-        // ======================================
+            // =================================================
+            // NOVA SYSTEM INSTRUCTIONS
+            // =================================================
 
-        console.log(
-            "\n👤 User asked:",
-            question
-        );
+            const systemMessage = {
 
+                role: "system",
 
-        console.log(
-            "🧠 Previous messages:",
-            history.length
-        );
-
-
-        // ======================================
-        // NOVA SYSTEM INSTRUCTIONS
-        // ======================================
-
-        const systemMessage = {
-
-            role: "system",
-
-            content: `
-
+                content: `
 You are NOVA, an AI study assistant.
 
 Your job is to help the user learn and solve problems.
@@ -289,266 +294,187 @@ NOVA should understand that "example" means an example of binary search.
 Do not unnecessarily repeat previous answers.
 
 Always provide a useful answer to the user's question.
-
 `
 
-        };
+            };
 
 
-        // ======================================
-        // BUILD CONVERSATION
-        // ======================================
+            // =================================================
+            // BUILD CONVERSATION
+            // =================================================
 
-        const messages = [
+            const messages = [
 
-            systemMessage,
+                systemMessage,
 
-            ...history,
+                ...safeHistory,
 
-            {
-                role: "user",
+                {
+                    role: "user",
+                    content: question
+                }
 
-                content: question
-
-            }
-
-        ];
+            ];
 
 
-        console.log(
-            "📨 Sending request to OpenRouter..."
-        );
-
-
-        // ======================================
-        // SEND REQUEST
-        // ======================================
-
-        const response =
-            await client.chat.completions.create({
-
-                model:
-                    "openrouter/free",
-
-                messages:
-                    messages
-
-            });
-
-
-        // ======================================
-        // GET ANSWER
-        // ======================================
-
-        const answer =
-            response
-                ?.choices
-                ?.[0]
-                ?.message
-                ?.content;
-
-
-        // ======================================
-        // CHECK ANSWER
-        // ======================================
-
-        if (
-
-            !answer ||
-
-            typeof answer !== "string" ||
-
-            answer.trim() === ""
-
-        ) {
-
-            console.error(
-                "❌ OpenRouter returned no usable answer."
+            console.log(
+                "📨 Sending request to OpenRouter..."
             );
 
 
-            return res.status(500).json({
+            // =================================================
+            // SEND REQUEST
+            // =================================================
 
-                error:
-                    "OpenRouter did not return a usable AI answer."
+            const response =
+                await client.chat.completions.create({
+
+                    model: "openrouter/free",
+
+                    messages: messages
+
+                });
+
+
+            // =================================================
+            // GET ANSWER
+            // =================================================
+
+            const answer =
+                response?.choices?.[0]?.message?.content;
+
+
+            // =================================================
+            // CHECK ANSWER
+            // =================================================
+
+            if (
+                !answer ||
+                typeof answer !== "string" ||
+                answer.trim() === ""
+            ) {
+
+                console.error(
+                    "❌ OpenRouter returned no usable answer."
+                );
+
+
+                return res.status(500).json({
+
+                    error:
+                        "OpenRouter did not return a usable AI answer."
+
+                });
+
+            }
+
+
+            // =================================================
+            // LOG ANSWER
+            // =================================================
+
+            console.log(
+                "\n🤖 NOVA:",
+                answer
+            );
+
+
+            // =================================================
+            // SEND ANSWER
+            // =================================================
+
+            return res.json({
+
+                answer: answer
 
             });
 
         }
 
+        catch (error) {
 
-        // ======================================
-        // LOG ANSWER
-        // ======================================
+            console.error(
+                "\n❌ OPENROUTER ERROR:"
+            );
 
-        console.log(
-            "\n🤖 NOVA:",
-            answer
-        );
+            console.error(error);
 
 
-        // ======================================
-        // SEND ANSWER
-        // ======================================
+            return res.status(500).json({
 
-        res.json({
+                error:
+                    "NOVA could not answer the question."
 
-            answer:
-                answer
+            });
 
-        });
+        }
 
     }
+);
 
 
-    catch (error) {
-
-        console.error(
-            "\n❌ OPENROUTER ERROR:"
-        );
-
-        console.error(error);
-
-
-        res.status(500).json({
-
-            error:
-                "NOVA could not answer the question."
-
-        });
-
-    }
-
-});
-
-
-// ==========================================
+// =====================================================
 // AI PERSONALIZED SUGGESTION
-// ==========================================
+// =====================================================
 
 app.post(
     "/ai-suggestion",
+    aiLimiter,
     async (req, res) => {
 
         try {
 
-            // ======================================
+            // =================================================
+            // CHECK API KEY
+            // =================================================
+
+            if (!process.env.OPENROUTER_API_KEY) {
+
+                return res.status(500).json({
+
+                    error:
+                        "OpenRouter API key is not configured."
+
+                });
+
+            }
+
+
+            // =================================================
             // GET STUDENT DATA
-            // ======================================
+            // =================================================
 
             const totalTasks =
-                Number(req.body.totalTasks);
-
+                Number(req.body.totalTasks) || 0;
 
             const completedTasks =
-                Number(req.body.completedTasks);
-
+                Number(req.body.completedTasks) || 0;
 
             const questionsAsked =
-                Number(req.body.questionsAsked);
-
+                Number(req.body.questionsAsked) || 0;
 
             const progress =
-                Number(req.body.progress);
+                Number(req.body.progress) || 0;
 
-
-            // ======================================
-            // VALIDATE NUMBERS
-            // ======================================
-
-            if (
-
-                !Number.isFinite(totalTasks) ||
-
-                !Number.isFinite(completedTasks) ||
-
-                !Number.isFinite(questionsAsked) ||
-
-                !Number.isFinite(progress)
-
-            ) {
-
-                return res.status(400).json({
-
-                    error:
-                        "Invalid student statistics."
-
-                });
-
-            }
-
-
-            // ======================================
-            // RANGE VALIDATION
-            // ======================================
-
-            if (
-
-                totalTasks < 0 ||
-
-                completedTasks < 0 ||
-
-                questionsAsked < 0 ||
-
-                progress < 0 ||
-
-                progress > 100
-
-            ) {
-
-                return res.status(400).json({
-
-                    error:
-                        "Invalid student statistics values."
-
-                });
-
-            }
-
-
-            // Completed tasks cannot exceed total tasks
-
-            if (
-                completedTasks >
-                totalTasks
-            ) {
-
-                return res.status(400).json({
-
-                    error:
-                        "Completed tasks cannot exceed total tasks."
-
-                });
-
-            }
-
-
-            // ======================================
-            // LOG STUDENT DATA
-            // ======================================
 
             console.log(
                 "\n📊 STUDENT PROGRESS"
             );
-
 
             console.log(
                 "Total tasks:",
                 totalTasks
             );
 
-
             console.log(
                 "Completed tasks:",
                 completedTasks
             );
 
-
             console.log(
                 "Questions asked:",
                 questionsAsked
             );
-
 
             console.log(
                 "Progress:",
@@ -556,9 +482,9 @@ app.post(
             );
 
 
-            // ======================================
+            // =================================================
             // AI PROMPT
-            // ======================================
+            // =================================================
 
             const prompt = `
 
@@ -586,13 +512,12 @@ Rules:
 - Do not use complicated language.
 
 Return ONLY the suggestion.
-
 `;
 
 
-            // ======================================
+            // =================================================
             // CALL OPENROUTER
-            // ======================================
+            // =================================================
 
             console.log(
                 "🤖 Generating personalized AI suggestion..."
@@ -602,15 +527,12 @@ Return ONLY the suggestion.
             const response =
                 await client.chat.completions.create({
 
-                    model:
-                        "openrouter/free",
+                    model: "openrouter/free",
 
                     messages: [
 
                         {
-
-                            role:
-                                "system",
+                            role: "system",
 
                             content:
                                 "You are NOVA, a personalized AI study coach."
@@ -618,12 +540,9 @@ Return ONLY the suggestion.
                         },
 
                         {
+                            role: "user",
 
-                            role:
-                                "user",
-
-                            content:
-                                prompt
+                            content: prompt
 
                         }
 
@@ -632,30 +551,22 @@ Return ONLY the suggestion.
                 });
 
 
-            // ======================================
+            // =================================================
             // GET SUGGESTION
-            // ======================================
+            // =================================================
 
             const suggestion =
-                response
-                    ?.choices
-                    ?.[0]
-                    ?.message
-                    ?.content;
+                response?.choices?.[0]?.message?.content;
 
 
-            // ======================================
+            // =================================================
             // CHECK SUGGESTION
-            // ======================================
+            // =================================================
 
             if (
-
                 !suggestion ||
-
                 typeof suggestion !== "string" ||
-
                 suggestion.trim() === ""
-
             ) {
 
                 return res.status(500).json({
@@ -668,29 +579,23 @@ Return ONLY the suggestion.
             }
 
 
-            // ======================================
-            // LOG SUGGESTION
-            // ======================================
-
             console.log(
                 "💡 NOVA Suggestion:",
                 suggestion
             );
 
 
-            // ======================================
+            // =================================================
             // SEND TO FRONTEND
-            // ======================================
+            // =================================================
 
-            res.json({
+            return res.json({
 
-                suggestion:
-                    suggestion
+                suggestion: suggestion
 
             });
 
         }
-
 
         catch (error) {
 
@@ -701,7 +606,7 @@ Return ONLY the suggestion.
             console.error(error);
 
 
-            res.status(500).json({
+            return res.status(500).json({
 
                 error:
                     "NOVA could not generate a study suggestion."
@@ -714,11 +619,50 @@ Return ONLY the suggestion.
 );
 
 
-// ==========================================
-// START SERVER
-// ==========================================
+// =====================================================
+// 404 HANDLER
+// =====================================================
 
-app.listen(PORT, "0.0.0.0", () => {
+app.use((req, res) => {
+
+    res.status(404).json({
+
+        error: "NOVA API route not found."
+
+    });
+
+});
+
+
+// =====================================================
+// GLOBAL ERROR HANDLER
+// =====================================================
+
+app.use((error, req, res, next) => {
+
+    console.error(
+        "❌ SERVER ERROR:",
+        error
+    );
+
+    res.status(500).json({
+
+        error:
+            "Internal NOVA server error."
+
+    });
+
+});
+
+
+// =====================================================
+// START SERVER
+// =====================================================
+
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
 
         console.log(
             "\n🚀 NOVA OpenRouter backend running at"
